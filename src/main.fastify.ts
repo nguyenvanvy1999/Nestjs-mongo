@@ -1,14 +1,14 @@
 /**
- * Express
+ * Fastify
  */
 
 import { NestFactory } from "@nestjs/core";
 import {
-  ExpressAdapter,
-  NestExpressApplication,
-} from "@nestjs/platform-express";
-import * as rateLimiter from "express-rate-limit";
+  FastifyAdapter,
+  NestFastifyApplication,
+} from "@nestjs/platform-fastify";
 import headers from "fastify-helmet";
+import fastifyRateLimiter from "fastify-rate-limit";
 import { AppModule } from "./modules/app/app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
@@ -35,9 +35,9 @@ export const SWAGGER_API_DESCRIPTION = "API Description";
 export const SWAGGER_API_CURRENT_VERSION = "1.0";
 
 (async () => {
-  const app = await NestFactory.create<NestExpressApplication>(
+  const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new ExpressAdapter({ logger: true }),
+    new FastifyAdapter({ logger: true }),
   );
   const options = new DocumentBuilder()
     .setTitle(SWAGGER_API_NAME)
@@ -48,8 +48,8 @@ export const SWAGGER_API_CURRENT_VERSION = "1.0";
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup(SWAGGER_API_ROOT, app, document);
   app.enableCors();
-  app.use(headers);
-  app.use(rateLimiter, {
+  app.register(headers);
+  app.register(fastifyRateLimiter, {
     max: 100,
     timeWindow: 60000,
   });
